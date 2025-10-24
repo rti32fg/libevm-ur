@@ -125,10 +125,6 @@ provides=(
   "${_pkg}-js=${pkgver}"
   "${_node}-${_pkg}=${pkgver}"
 )
-conflicts=(
-  "${_pkg}-js"
-  "${_node}-${_pkg}"
-)
 _url="${url}"
 _tag="${_commit}"
 _tag_name="commit"
@@ -204,6 +200,14 @@ check() {
 package_libevm() {
   local \
     _make_opts=()
+  provides=(
+  "${_pkg}-js=${pkgver}"
+  "${_node}-${_pkg}=${pkgver}"
+  )
+  conflicts=(
+    "${_pkg}-js"
+    "${_node}-${_pkg}"
+  )
   _make_opts=(
     PREFIX="/usr"
     DESTDIR="${pkgdir}"
