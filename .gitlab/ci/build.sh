@@ -257,7 +257,7 @@ _gl_dl_mini() {
     _ns="${1}" \
     _pkg="${2}" \
     _commit="${3}" \
-    _url \
+    url \
     _http \
     _repo \
     _tarname \

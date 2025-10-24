@@ -48,6 +48,9 @@ fi
 if [[ ! -v "_offline" ]]; then
   _offline="false"
 fi
+if [[ ! -v "_docs" ]]; then
+  _docs="true"
+fi
 _archive_format="tar.gz"
 if [[ "${_git_http}" == "github" ]]; then
   _archive_format="zip"
@@ -55,9 +58,15 @@ fi
 _node="nodejs"
 _py="python"
 _pkg=libevm
-pkgname="${_pkg}"
-pkgver="0.0.0.0.0.0.0.0.1.1.1.1.1.1"
-_commit="4eb11a2ec2a4f22bfc5d7852a9b305004e7a35b0"
+pkgbase="${_pkg}"
+pkgname+=(
+  "${_pkg}"
+)
+if [[ "${_docs}" == "true" ]]; then
+  _docs="true"
+fi
+pkgver="0.0.0.0.0.0.0.0.1.1.1.1.1.1.1"
+_commit="9da48bb98d051f3d2eb7e624cac1a936140f5f2a"
 pkgrel=1
 _pkgdesc=(
   "Bash library containing useful functions"
@@ -97,8 +106,12 @@ optdepends=(
 )
 makedepends=(
   'make'
-  "${_py}-docutils"
 )
+if [[ "${_docs}" == "true" ]]; then
+  makedepends+=(
+    "${_py}-docutils"
+  )
+fi
 checkdepends=(
   "shellcheck"
 )
@@ -114,30 +127,30 @@ _url="${url}"
 _tag="${_commit}"
 _tag_name="commit"
 _tarname="${pkgname}-${_tag}"
+_archive_name="${_tarname}.${_archive_format}"
 if [[ "${_offline}" == "true" ]]; then
   _url="file://${HOME}/${pkgname}"
 fi
-_archive_sum="9355ffc77c174cf44d4d969cdc640db2d1ecfe29353942878ff1b18fd905e750"
-_archive_sig_sum="bf11b7eb0959679417cc99f3ece08750bf85d21b90ada0617a73345812f5f759"
+_sum="679d18d55d554cd6267d3e2245868aaa8e5a9f17b4e95495ff5d8e14082dc443"
+_sig_sum="9afd013b01b44962980385b39cc2d97b70d66b6055dbb094bc8f880cdc794634"
 _evmfs_ns="0x87003Bd6C074C713783df04f36517451fF34CBEf"
 _evmfs_network="100"
 _evmfs_address="0x69470b18f8b8b5f92b48f6199dcb147b4be96571"
 _evmfs_dir="evmfs://${_evmfs_network}/${_evmfs_address}/${_evmfs_ns}"
-_evmfs_archive_uri="${_evmfs_dir}/${_archive_sum}"
-_evmfs_archive_src="${_tarname}.tar.gz::${_evmfs_archive_uri}"
-_archive_sig_uri="${_evmfs_dir}/${_archive_sig_sum}"
-_archive_sig_src="${_tarname}.tar.gz.sig::${_archive_sig_uri}"
+_evmfs_uri="${_evmfs_dir}/${_sum}"
+_evmfs_src="${_archive_name}::${_evmfs_uri}"
+_sig_uri="${_evmfs_dir}/${_sig_sum}"
+_sig_src="${_archive_name}.sig::${_sig_uri}"
 if [[ "${_evmfs}" == "true" ]]; then
   makedepends+=(
     "evmfs"
   )
-  _src="${_evmfs_archive_src}"
-  _sum="${_archive_sum}"
+  _src="${_evmfs_src}"
   source+=(
-    "${_archive_sig_src}"
+    "${_sig_src}"
   )
   sha256sums+=(
-    "${_archive_sig_sum}"
+    "${_sig_sum}"
   )
 elif [[ "${_git}" == true ]]; then
   makedepends+=(
@@ -148,12 +161,10 @@ elif [[ "${_git}" == true ]]; then
 elif [[ "${_git}" == false ]]; then
   if [[ "${_tag_name}" == 'pkgver' ]]; then
     _uri="${_url}/archive/refs/tags/${_tag}.${_archive_format}"
-    _src="${_tarname}.tar.gz::${_uri}"
-    _sum="${_archive_sum}"
+    _src="${_archive_name}::${_uri}"
   elif [[ "${_tag_name}" == "commit" ]]; then
     _uri="${_url}/archive/${_commit}.${_archive_format}"
-    _src="${_tarname}.${_archive_format}::${_uri}"
-    _sum="${_archive_sum}"
+    _src="${_archive_name}::${_uri}"
   fi
 fi
 source=(
@@ -183,7 +194,7 @@ check() {
     check
 }
 
-package() {
+package_libevm() {
   local \
     _make_opts=()
   _make_opts=(
@@ -194,11 +205,31 @@ package() {
     "${_tarname}"
   make \
     "${_make_opts[@]}" \
-    install
+    install-scripts
   install \
     -Dm644 \
     "COPYING" \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
+
+package_libevm-docs() {
+  local \
+    _make_opts=()
+  _make_opts=(
+    PREFIX="/usr"
+    DESTDIR="${pkgdir}"
+  )
+  cd \
+    "${_tarname}"
+  make \
+    "${_make_opts[@]}" \
+    install-doc \
+    install-man
+  install \
+    -Dm644 \
+    "COPYING" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+
 
 # vim: ft=sh syn=sh et
