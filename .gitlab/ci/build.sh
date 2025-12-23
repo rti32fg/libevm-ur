@@ -220,7 +220,7 @@ _build() {
         "_evmfs")"
     if [[ "${_evmfs}" == "false" ]]; then
       _makepkg_opts+=(
-        --nointeg
+        --skipinteg
       )
     fi
   fi
