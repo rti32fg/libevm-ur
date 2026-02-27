@@ -43,7 +43,7 @@ if [[ ! -v "_git" ]]; then
   _git="false"
 fi
 if [[ ! -v "_git_http" ]]; then
-  _git_http="gitlab"
+  _git_http="github"
 fi
 if [[ ! -v "_offline" ]]; then
   _offline="false"
